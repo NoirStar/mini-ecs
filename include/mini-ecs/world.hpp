@@ -2,6 +2,7 @@
 
 #include <mini-ecs/entity.hpp>
 #include <mini-ecs/component_storage.hpp>
+#include <mini-ecs/concepts.hpp>
 #include <tuple>
 #include <vector>
 
@@ -25,7 +26,7 @@ public:
         entityManager_.destroy(entity);
     }
 
-    template<typename... Cs>
+    template<Component... Cs>
     std::vector<Entity> queryEntities() {
         std::vector<Entity> result;
         for (auto e : entityManager_.getAllAlive()) {
@@ -40,22 +41,27 @@ public:
         return entityManager_.isAlive(entity);
     }
 
-    template<typename C>
+    template<Component C>
     void addComponent(Entity entity, C component) {
+        static_assert(std::is_copy_constructible_v<C>,
+            "Component must be copy constructible!");
+        static_assert(std::is_default_constructible_v<C>,
+            "Component must be default constructible!");
+    
         getStorage<C>().add(entity, std::move(component));
     }
 
-    template<typename C>
+    template<Component C>
     void removeComponent(Entity entity) {
         getStorage<C>().remove(entity);
     }
 
-    template<typename C>
+    template<Component C>
     C* getComponent(Entity entity) {
         return getStorage<C>().get(entity);
     }
 
-    template<typename C>
+    template<Component C>
     bool hasComponent(Entity entity) const {
         return getStorage<C>().has(entity);
     }
@@ -64,11 +70,11 @@ private:
     EntityManager entityManager_;
     std::tuple<ComponentStorage<Components>...> storages_;
 
-    template<typename C>
+    template<Component C>
     ComponentStorage<C>& getStorage() {
         return std::get<ComponentStorage<C>>(storages_);
     }
-    template<typename C>
+    template<Component C>
     const ComponentStorage<C>& getStorage() const {
         return std::get<ComponentStorage<C>>(storages_);
     }
