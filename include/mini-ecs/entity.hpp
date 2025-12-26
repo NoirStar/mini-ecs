@@ -55,6 +55,17 @@ public:
         return (gen == slots_[id].generation) && slots_[id].alive;
     }
 
+    std::vector<Entity> getAllAlive() {
+        std::vector<Entity> result;
+        for (uint32_t id=0; id<slots_.size(); ++id) {
+            if (slots_[id].alive) {
+                result.push_back(
+                    (static_cast<uint64_t>(slots_[id].generation) << 32) | id);
+            }
+        }
+        return result;
+    }
+
     struct Slot {
         uint32_t generation = 0;
         bool alive = false;

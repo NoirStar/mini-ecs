@@ -7,7 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # 헤더 온리 라이브러리
 add_library(mini-ecs INTERFACE)
-target_include_directories(mini-ecs INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(mini-ecs INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # 테스트용 실행 파일
 add_executable(test_ecs test_main.cpp)

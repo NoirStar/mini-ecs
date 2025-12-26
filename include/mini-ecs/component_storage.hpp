@@ -1,7 +1,7 @@
 #pragma once
 
 #include <unordered_map>
-#include "entity.hpp"
+#include <mini-ecs/entity.hpp>
 
 template<typename T>
 class ComponentStorage {

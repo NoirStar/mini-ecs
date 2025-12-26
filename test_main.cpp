@@ -1,6 +1,6 @@
-#include "entity.hpp"
-#include "component_storage.hpp"
-#include "world.hpp"
+#include <mini-ecs/entity.hpp>
+#include <mini-ecs/component_storage.hpp>
+#include <mini-ecs/world.hpp>
 #include <iostream>
 
 struct Position {

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "entity.hpp"
-#include "component_storage.hpp"
+#include <mini-ecs/entity.hpp>
+#include <mini-ecs/component_storage.hpp>
 #include <tuple>
+#include <vector>
 
 // ECS의 모든 것을 관리하는 컨테이너
 template<typename... Components>
@@ -19,9 +20,22 @@ public:
     Entity createEntity() {
         return entityManager_.create();
     }
+
     void destroyEntity(Entity entity) {
         entityManager_.destroy(entity);
     }
+
+    template<typename... Cs>
+    std::vector<Entity> queryEntities() {
+        std::vector<Entity> result;
+        for (auto e : entityManager_.getAllAlive()) {
+            if((hasComponent<Cs>(e) && ...)) {
+                result.push_back(e);
+            }
+        }
+        return result;
+    }
+
     bool isAlive(Entity entity) {
         return entityManager_.isAlive(entity);
     }
