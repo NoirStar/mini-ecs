@@ -13,6 +13,11 @@ public:
     EntityManager() = default;
     ~EntityManager() = default;
 
+    EntityManager(const EntityManager&) = delete;
+    EntityManager& operator=(const EntityManager&) = delete;
+    EntityManager(EntityManager&&) = default;
+    EntityManager& operator=(EntityManager&&) = default;
+
     Entity create() {
         // 새 슬롯 생성
         if (free_list_.empty()) {
