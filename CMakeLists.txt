@@ -12,3 +12,7 @@ target_include_directories(mini-ecs INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/includ
 # 테스트용 실행 파일
 add_executable(test_ecs test_main.cpp)
 target_link_libraries(test_ecs PRIVATE mini-ecs)
+
+# 파티클 예제
+add_executable(particle_example examples/particle/main.cpp)
+target_link_libraries(particle_example PRIVATE mini-ecs)
