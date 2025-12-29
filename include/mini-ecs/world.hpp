@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mini-ecs/entity.hpp>
-#include <mini-ecs/component_storage.hpp>
+#include <mini-ecs/sparse_set.hpp>
 #include <mini-ecs/concepts.hpp>
 #include <tuple>
 #include <vector>
@@ -68,14 +68,14 @@ public:
 
 private:
     EntityManager entityManager_;
-    std::tuple<ComponentStorage<Components>...> storages_;
+    std::tuple<SparseSet<Components>...> storages_;
 
     template<Component C>
-    ComponentStorage<C>& getStorage() {
-        return std::get<ComponentStorage<C>>(storages_);
+    SparseSet<C>& getStorage() {
+        return std::get<SparseSet<C>>(storages_);
     }
     template<Component C>
-    const ComponentStorage<C>& getStorage() const {
-        return std::get<ComponentStorage<C>>(storages_);
+    const SparseSet<C>& getStorage() const {
+        return std::get<SparseSet<C>>(storages_);
     }
 };
