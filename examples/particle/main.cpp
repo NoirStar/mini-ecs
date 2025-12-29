@@ -2,10 +2,14 @@
 #include <format>
 #include <thread>
 #include <chrono>
+#include <random>
 
 #include <mini-ecs/world.hpp>
 #include "types.hpp"
 #include "components.hpp"
+#include "systems/movement.hpp"
+#include "systems/lifetime.hpp"
+#include "systems/render.hpp"
 
 using namespace std::chrono_literals;
 
@@ -13,28 +17,37 @@ int main() {
     // 1. World 생성 (컴포넌트 타입들 등록)
     GameWorld world;
 
-    Entity particle = world.createEntity();
+    // 랜덤 엔진
+    std::random_device rd;
+    std::mt19937 gen(rd());
 
-    // particle이라는 Entity에 Component를 추가.
-    world.addComponent<Position>(particle, {40.0f, 12.0f});
-    world.addComponent<Velocity>(particle, {1.0f, 0.0f});
-    world.addComponent<Lifetime>(particle, {5.0f});
-    world.addComponent<Particle>(particle, {'*'});
-    
-    for (int i{}; i<10; ++i) {
-        // 1. 입력 (마우스클릭 위치에 터지기)
+    // 분포 범위 (속도, 라이프타임)
+    std::uniform_real_distribution<float> velDist(-100.0f, 100.0f);
+    std::uniform_real_distribution<float> lifeDist(1.0f, 3.0f);
+
+    for (int i{}; i<1000; i++) {
+        Entity p = world.createEntity();
+        world.addComponent<Position>(p, {40.0f, 12.0f});  // 중앙
+        world.addComponent<Velocity>(p, {velDist(gen), velDist(gen)});
+        world.addComponent<Lifetime>(p, {lifeDist(gen)});
+        world.addComponent<Particle>(p, {'*'});
+    }
+
+    // System 생성
+    MovementSystem movement;
+    LifetimeSystem lifetime;
+    RenderSystem render;
+
+    while (true) {
+        float dt = 0.016f;  // 약 60 FPS
+        movement.update(world, dt);
+        lifetime.update(world, dt);
+        render.update(world, dt);
         
-        // 2. 업데이트
-        std::vector<Entity> entities = world.queryEntities<Position, Velocity>();
-        for (auto& e : entities) {
-            Position* ep = world.getComponent<Position>(e);
-            Velocity* ev = world.getComponent<Velocity>(e);
-            ep->x += ev->vx;
-            ep->y += ev->vy;
+        if (world.queryEntities<Particle>().empty()) {
+            break;
         }
-        
-        // 4. 대기
-        std::this_thread::sleep_for(100ms);
+        std::this_thread::sleep_for(16ms);
     }
 
     return 0;
