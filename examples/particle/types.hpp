@@ -2,4 +2,4 @@
 #include <mini-ecs/world.hpp>
 #include "components.hpp"
 
-using GameWorld = World<Position, Velocity, Lifetime, Particle>;
+using GameWorld = World<Position, Velocity, Lifetime, Particle, SpawnRequest>;

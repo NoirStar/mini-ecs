@@ -17,3 +17,9 @@ struct Lifetime {
 struct Particle {
     char symbol;
 };
+
+struct SpawnRequest {
+    float x;
+    float y;
+    int count;
+};

@@ -8,6 +8,7 @@
 #include <array>
 #include <iostream>
 #include <cstdlib>
+#include <cstring>
 
 constexpr int WIDTH = 80;
 constexpr int HEIGHT = 24;
@@ -15,8 +16,10 @@ constexpr int HEIGHT = 24;
 class RenderSystem : public ISystem {
 public:
     RenderSystem() {
+        hConsole_ = GetStdHandle(STD_OUTPUT_HANDLE);
         system("cls");
         hideCursor();
+        drawBorder();
     }
     ~RenderSystem() = default;
 
@@ -36,25 +39,53 @@ public:
             }
         }
 
-        // 커서를 (0, 0)으로
-        COORD pos = {0, 0};
-        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
-        for (int y{}; y < HEIGHT; ++y) {
-            for (int x{}; x < WIDTH; ++x) {
-                std::cout << buffer_[y * WIDTH + x];
-            }
-            std::cout << '\n';
+        // 파티클 출력 (테두리 안쪽, y+1 위치)
+        DWORD written;
+        for (int y = 0; y < HEIGHT; ++y) {
+            COORD pos = {1, static_cast<SHORT>(y + 1)};  // x+1, y+1 (테두리 안쪽)
+            WriteConsoleOutputCharacterA(
+                hConsole_, &buffer_[y * WIDTH], WIDTH, pos, &written);
         }
     }
 
 private:
+    HANDLE hConsole_;
     std::array<char, WIDTH * HEIGHT> buffer_{};
 
     void hideCursor() {
-        HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
         CONSOLE_CURSOR_INFO info;
         info.dwSize = 1;
         info.bVisible = FALSE;
-        SetConsoleCursorInfo(consoleHandle, &info);
+        SetConsoleCursorInfo(hConsole_, &info);
+    }
+
+    void drawBorder() {
+        DWORD written;
+        
+        // 상단 테두리: +----...----+
+        char topLine[WIDTH + 3];
+        topLine[0] = '+';
+        std::memset(topLine + 1, '-', WIDTH);
+        topLine[WIDTH + 1] = '+';
+        topLine[WIDTH + 2] = '\0';
+        COORD pos = {0, 0};
+        WriteConsoleOutputCharacterA(hConsole_, topLine, WIDTH + 2, pos, &written);
+
+        // 좌우 테두리: |
+        for (int y = 1; y <= HEIGHT; ++y) {
+            COORD leftPos = {0, static_cast<SHORT>(y)};
+            WriteConsoleOutputCharacterA(hConsole_, "|", 1, leftPos, &written);
+            COORD rightPos = {WIDTH + 1, static_cast<SHORT>(y)};
+            WriteConsoleOutputCharacterA(hConsole_, "|", 1, rightPos, &written);
+        }
+
+        // 하단 테두리: +----...----+
+        pos = {0, HEIGHT + 1};
+        WriteConsoleOutputCharacterA(hConsole_, topLine, WIDTH + 2, pos, &written);
+
+        // 안내 메시지
+        const char* msg = "  Click to spawn particles! (Ctrl+C to exit)";
+        pos = {0, HEIGHT + 2};
+        WriteConsoleOutputCharacterA(hConsole_, msg, static_cast<DWORD>(strlen(msg)), pos, &written);
     }
 };
